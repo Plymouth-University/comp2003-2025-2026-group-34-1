@@ -1,0 +1,81 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace GroupProjectCode
+{
+    public class Account
+    {
+        public string Id { get; set; }
+        public int Age { get; set; }
+        public string Hobbies { get; set; }
+        public string Location { get; set; }
+        public string VideoGame1 { get; set; }
+        public string VideoGame2 { get; set; }
+        public string VideoGame3 { get; set; }
+        public string VideoGame4 { get; set; }
+        public string VideoGame5 { get; set; }
+    }
+
+    public class Program
+    {
+        // code for case/space-insensitive string comparison
+        static bool StringEquals(string a, string b)
+        {
+            return string.Equals(a?.Trim(), b?.Trim(), StringComparison.OrdinalIgnoreCase);
+        }
+
+        // Compute match score between two accounts
+        static int MatchScore(Account a, Account b)
+        {
+            int score = 0;
+            if (a.Age == b.Age) score += 2; // 1st attribute: Age (2 points)
+            if (StringEquals(a.Hobbies, b.Hobbies)) score += 1; // 2nd attribute: Hobbies (1 point)
+            if (StringEquals(a.Location, b.Location)) score += 2; // 3rd attribute: Location (2 points)
+            if (StringEquals(a.VideoGame1, b.VideoGame1)) score += 1; // 4th attribute: VideoGame1 (1 point)
+            if (StringEquals(a.VideoGame2, b.VideoGame2)) score += 1; // 5th attribute: VideoGame2 (1 point)
+            if (StringEquals(a.VideoGame3, b.VideoGame3)) score += 1; // 6th attribute: VideoGame3 (1 point)
+            if (StringEquals(a.VideoGame4, b.VideoGame4)) score += 1; // 7th attribute: VideoGame4 (1 point)
+            if (StringEquals(a.VideoGame5, b.VideoGame5)) score += 1; // 8th attribute: VideoGame5 (1 point)
+            return score;
+        } // example attributes, these are to be changed later on
+
+        public static void Main()
+        {
+            var accounts = new List<Account>
+            {
+                new Account { Id = "10001", Age = 25, Hobbies = "  hiking  ", Location = "london", VideoGame1 = "overWATCH", VideoGame2 = "  mineCraft ", VideoGame3 = "CELESTE", VideoGame4 = "apex legends", VideoGame5 = "hades" },
+                new Account { Id = "10002", Age = 27, Hobbies = "gAMing", Location = " manchester ", VideoGame1 = "valorant", VideoGame2 = "minecraft", VideoGame3 = "league of legends", VideoGame4 = "PORTAL 2", VideoGame5 = "hollow knight" },
+                new Account { Id = "10003", Age = 25, Hobbies = "Hiking", Location = "LONDON ", VideoGame1 = "Overwatch ", VideoGame2 = "VALORANT", VideoGame3 = "stardew valley", VideoGame4 = "celeste", VideoGame5 = "rocket league" },
+                new Account { Id = "10004", Age = 30, Hobbies = "  cooking", Location = "BIRMINGHAM", VideoGame1 = "fifa", VideoGame2 = "rocket league", VideoGame3 = "among us", VideoGame4 = "portal 2", VideoGame5 = "HADES" },
+                new Account { Id = "10005", Age = 22, Hobbies = "Reading", Location = "liverpool", VideoGame1 = "minecraft", VideoGame2 = "stardew valley", VideoGame3 = "celeste", VideoGame4 = "hollow knight", VideoGame5 = "FIFA" },
+                new Account { Id = "10006", Age = 25, Hobbies = "  hiking", Location = "london", VideoGame1 = "overwatch", VideoGame2 = "rocket league", VideoGame3 = "apex legends", VideoGame4 = "league of legends", VideoGame5 = "among us" },
+                new Account { Id = "10007", Age = 28, Hobbies = "GAMING", Location = "leeds", VideoGame1 = "valorant", VideoGame2 = "FIFA", VideoGame3 = "celeste", VideoGame4 = "portal 2", VideoGame5 = "hades" },
+                new Account { Id = "10008", Age = 27, Hobbies = "Cooking", Location = "Manchester", VideoGame1 = "stardew valley", VideoGame2 = "MINECRAFT", VideoGame3 = "among us", VideoGame4 = "apex legends", VideoGame5 = "league of legends" },
+                new Account { Id = "10009", Age = 25, Hobbies = "reading ", Location = "london", VideoGame1 = "overwatch", VideoGame2 = "stardew valley", VideoGame3 = "hollow knight", VideoGame4 = "fifa", VideoGame5 = "portal 2" },
+                new Account { Id = "10010", Age = 30, Hobbies = "  Hiking", Location = "birmingham ", VideoGame1 = "FIFA", VideoGame2 = "valorant", VideoGame3 = "rocket league", VideoGame4 = "celeste", VideoGame5 = "apex legends" }
+            };
+
+            int targetIndex = 0; // Compare the first account to all others
+            var target = accounts[targetIndex];
+
+            var scores = new List<(int Score, Account Acc)>();
+            for (int i = 0; i < accounts.Count; ++i)
+            {
+                if (i == targetIndex) continue;
+                int score = MatchScore(target, accounts[i]);
+                scores.Add((score, accounts[i]));
+            }
+
+            var ranked = scores.OrderByDescending(s => s.Score).ThenBy(s => s.Acc.Id).ToList();
+
+            Console.WriteLine($"Target: {target.Id} (Age: {target.Age}, Hobbies: {target.Hobbies}, Location: {target.Location}, VG1: {target.VideoGame1}, VG2: {target.VideoGame2}, VG3: {target.VideoGame3}, VG4: {target.VideoGame4}, VG5: {target.VideoGame5})");
+            Console.WriteLine("Matches (score, id, attributes):");
+            foreach (var s in ranked)
+            {
+                var a = s.Acc;
+                Console.WriteLine($"{s.Score}  {a.Id} (Age: {a.Age}, Hobbies: {a.Hobbies}, Location: {a.Location}, VG1: {a.VideoGame1}, VG2: {a.VideoGame2}, VG3: {a.VideoGame3}, VG4: {a.VideoGame4}, VG5: {a.VideoGame5})");
+            }
+        }
+    }
+}
