@@ -1,0 +1,182 @@
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <conio.h>   // for getch() password masking on Windows (works in MinGW)
+#include <ctype.h>
+
+// database file name
+#define USER_DB "users.db"
+
+// prototypes
+void menu();
+void signUp();
+void login();
+int userExists(const char *username);
+unsigned long hashPassword(const char *password);
+void inputPassword(char *buffer, int max);
+
+
+unsigned long hashPassword(const char *password) {
+    unsigned long hash = 5381;
+    int c;
+
+    while ((c = *password++)) {
+        hash = ((hash << 5) + hash) + c;  
+    }
+    return hash;
+}
+
+
+int userExists(const char *username) {
+    FILE *fp = fopen(USER_DB, "r");
+    if (!fp) return 0;
+
+    char fileUser[50];
+    unsigned long fileHash;
+
+    while (fscanf(fp, "%49s %lu", fileUser, &fileHash) != EOF) {
+        if (strcmp(username, fileUser) == 0) {
+            fclose(fp);
+            return 1;
+        }
+    }
+
+    fclose(fp);
+    return 0;
+}
+
+
+void inputPassword(char *buffer, int max) {
+    int i = 0;
+    char ch;
+
+    while (1) {
+        ch = getch();       // read key without showing
+
+        if (ch == 13) {     // Enter key
+            buffer[i] = '\0';
+            printf("\n");
+            break;
+        }
+        else if (ch == 8) { // Backspace
+            if (i > 0) {
+                i--;
+                printf("\b \b"); // delete char from screen
+            }
+        }
+        else if (i < max - 1 && isprint(ch)) {
+            buffer[i++] = ch;
+            printf("*");   // mask output
+        }
+    }
+}
+
+
+void signUp() {
+    char username[50];
+    char password[50];
+
+    printf("\n========== SIGN UP ==========\n");
+
+    printf("Enter a username: ");
+    scanf("%49s", username);
+
+    if (userExists(username)) {
+        printf("Username already taken. Please choose another.\n");
+        return;
+    }
+
+    printf("Enter a password: ");
+    inputPassword(password, 50);
+
+    unsigned long hashed = hashPassword(password);
+
+    FILE *fp = fopen(USER_DB, "a");
+    if (!fp) {
+        printf("Error: could not open database file.\n");
+        return;
+    }
+
+    fprintf(fp, "%s %lu\n", username, hashed);
+    fclose(fp);
+
+    printf("Account created successfully!\n");
+}
+
+
+void login() {
+    char username[50];
+    char password[50];
+    char fileUser[50];
+    unsigned long fileHash;
+
+    printf("\n========== LOGIN ==========\n");
+
+    printf("Username: ");
+    scanf("%49s", username);
+
+    printf("Password: ");
+    inputPassword(password, 50);
+
+    unsigned long inputHash = hashPassword(password);
+
+    FILE *fp = fopen(USER_DB, "r");
+    if (!fp) {
+        printf("Error: database missing.\n");
+        return;
+    }
+
+    int success = 0;
+    while (fscanf(fp, "%49s %lu", fileUser, &fileHash) != EOF) {
+        if (strcmp(username, fileUser) == 0 && inputHash == fileHash) {
+            success = 1;
+            break;
+        }
+    }
+
+    fclose(fp);
+
+    if (success) {
+        printf("Login successful! Welcome, %s.\n", username);
+    } else {
+        printf("Incorrect username or password.\n");
+    }
+}
+
+void menu() {
+    int choice;
+
+    while (1) {
+        printf("\n======================================");
+        printf("\n       SIMPLE USER LOGIN PROGRAM");
+        printf("\n======================================");
+        printf("\n1. Sign Up");
+        printf("\n2. Login");
+        printf("\n3. Exit");
+        printf("\nSelect option: ");
+
+        if (scanf("%d", &choice) != 1) {
+            printf("Invalid input.\n");
+            while (getchar() != '\n'); 
+            continue;
+        }
+
+        switch (choice) {
+            case 1: signUp(); break;
+            case 2: login(); break;
+            case 3: printf("Goodbye!\n"); exit(0);
+            default: printf("Invalid choice.\n");
+        }
+    }
+}
+
+int main() {
+    printf("======================================\n");
+    printf("        USER LOGIN SYSTEM (C)\n");
+    printf("======================================\n");
+
+    menu();
+
+    return 0;
+}
