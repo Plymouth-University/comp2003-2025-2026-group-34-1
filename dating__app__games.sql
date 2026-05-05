@@ -17,6 +17,7 @@ CREATE TABLE users (
     id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100),
     email VARCHAR(255) UNIQUE,
+    password_hash VARCHAR(255),
     gender VARCHAR(20),
     birthdate DATE,
     bio TEXT,
